@@ -12,7 +12,7 @@ export type { ClientConfig, ErrorResponse }
 const logger = useLogger(name)
 
 async function readConfigFile (path: string): Promise<ClientConfig> {
-  return await jiti(import.meta.url, { interopDefault: true, requireCache: false })(path)
+  return await jiti(import.meta.url, { esmResolve: true, interopDefault: true, requireCache: false })(path)
 }
 
 export type ModuleOptions = NuxtApolloConfig
@@ -59,7 +59,7 @@ export default defineNuxtModule<NuxtApolloConfig<any>>({
 
     async function prepareClients () {
       // eslint-disable-next-line prefer-const
-      for (let [k, v] of Object.entries(options.clients)) {
+      for (let [k, v] of Object.entries(options.clients || {})) {
         if (typeof v === 'string') {
           const path = rootResolver.resolve(v)
           const resolvedConfig = existsSync(path) && await readConfigFile(path)
@@ -152,7 +152,6 @@ export default defineNuxtModule<NuxtApolloConfig<any>>({
       config.optimizeDeps.exclude.push('@vue/apollo-composable')
 
       config.plugins = config.plugins || []
-      // @ts-ignore
       config.plugins.push(GraphQLPlugin())
 
       if (!nuxt.options.dev) { config.define = { ...config.define, __DEV__: false } }
@@ -202,7 +201,7 @@ declare module '#app' {
   }
 
   interface RuntimeNuxtHooks {
-    'apollo:auth': (params: { client: string, token: Ref<string> }) => void
+    'apollo:auth': (params: { client: string, token: Ref<string | null> }) => void
     'apollo:error': (error: ErrorResponse) => void
   }
 }

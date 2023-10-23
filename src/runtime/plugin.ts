@@ -19,19 +19,19 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   for (const [key, clientConfig] of Object.entries(NuxtApollo.clients)) {
     const getAuth = async () => {
-      const token = ref<string>()
+      const token = ref<string | null>()
 
       await nuxtApp.callHook('apollo:auth', { token, client: key })
 
       if (!token.value) {
         if (clientConfig.tokenStorage === 'cookie') {
           if (process.client) {
-            token.value = useCookie(clientConfig.tokenName).value
+            token.value = useCookie(clientConfig.tokenName!).value
           } else if (requestCookies?.cookie) {
             token.value = requestCookies.cookie.split(';').find(c => c.trim().startsWith(`${clientConfig.tokenName}=`))?.split('=')?.[1]
           }
         } else if (process.client && clientConfig.tokenStorage === 'localStorage') {
-          token.value = localStorage.getItem(clientConfig.tokenName)
+          token.value = localStorage.getItem(clientConfig.tokenName!)
         }
 
         if (!token.value) { return }
@@ -53,7 +53,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         headers: {
           ...headers,
           ...(requestCookies && requestCookies),
-          [clientConfig.authHeader]: auth
+          [clientConfig.authHeader!]: auth
         }
       }
     })
@@ -66,7 +66,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     const httpLink = authLink.concat(clientConfig.useUploadLink ? createUploadLink(httpLinkOptions) : createHttpLink(httpLinkOptions))
 
-    let wsLink: GraphQLWsLink = null
+    let wsLink: GraphQLWsLink | null = null
 
     if (process.client && clientConfig.wsEndpoint) {
       const wsClient = createRestartableClient({
@@ -77,7 +77,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
           if (!auth) { return }
 
-          return { [clientConfig.authHeader]: auth }
+          return { [clientConfig.authHeader!]: auth }
         }
       })
 
@@ -88,8 +88,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
 
     const errorLink = onError((err) => {
-      if (process.env.NODE_ENV === 'production') { return }
-
       nuxtApp.callHook('apollo:error', err)
     })
 
