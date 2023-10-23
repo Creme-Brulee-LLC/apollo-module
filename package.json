@@ -1,6 +1,6 @@
 {
   "name": "@nuxtjs/apollo",
-  "version": "5.0.0-alpha.3",
+  "version": "5.0.0-alpha.4",
   "license": "MIT",
   "repository": "https://github.com/nuxt-modules/apollo-module",
   "homepage": "https://apollo.nuxtjs.org",
@@ -27,6 +27,7 @@
     "@nuxt/module-builder": "^0.2.0",
     "@rollup/plugin-graphql": "^1.1.0",
     "@vue/apollo-composable": "4.0.0-beta.1",
+    "apollo-upload-client": "^17.0.0",
     "cookie-es": "^0.5.0",
     "defu": "^6.0.0",
     "destr": "^1.2.0",
